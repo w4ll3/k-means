@@ -1,0 +1,90 @@
+size: 59, threads: 1
+13,214s
+size: 59, threads: 2
+6,839s
+size: 59, threads: 4
+3,600s
+size: 59, threads: 6
+2,739s
+size: 59, threads: 8
+2,101s
+size: 59, threads: 10
+3,047s
+size: 59, threads: 12
+2,635s
+size: 59, threads: 14
+1,803s
+size: 59, threads: 16
+1,874s
+size: 161, threads: 1
+15,467s
+size: 161, threads: 2
+7,854s
+size: 161, threads: 4
+4,108s
+size: 161, threads: 6
+2,904s
+size: 161, threads: 8
+2,354s
+size: 161, threads: 10
+3,312s
+size: 161, threads: 12
+2,857s
+size: 161, threads: 14
+2,587s
+size: 161, threads: 16
+2,552s
+size: 256, threads: 1
+33,887s
+size: 256, threads: 2
+17,115s
+size: 256, threads: 4
+8,871s
+size: 256, threads: 6
+6,297s
+size: 256, threads: 8
+5,000s
+size: 256, threads: 10
+3,990s
+size: 256, threads: 12
+4,198s
+size: 256, threads: 14
+3,617s
+size: 256, threads: 16
+2,939s
+size: 1380, threads: 1
+23,672s
+size: 1380, threads: 2
+12,650s
+size: 1380, threads: 4
+6,418s
+size: 1380, threads: 6
+4,596s
+size: 1380, threads: 8
+3,863s
+size: 1380, threads: 10
+4,327s
+size: 1380, threads: 12
+3,987s
+size: 1380, threads: 14
+4,285s
+size: 1380, threads: 16
+3,986s
+size: 1601, threads: 1
+60,708s
+size: 1601, threads: 2
+32,010s
+size: 1601, threads: 4
+16,195s
+size: 1601, threads: 6
+11,606s
+size: 1601, threads: 8
+8,997s
+size: 1601, threads: 10
+0,542s
+size: 1601, threads: 12
+9,404s
+size: 1601, threads: 14
+9,794s
+size: 1601, threads: 16
+9,514s

@@ -79,17 +79,17 @@ vector<int> recalculate(int centroid_id, vector<int> centroid)
 void *k_means(void *t_id)
 {
     int *id = (int *)t_id;
-    int exampleStripe = (int)ceil(examples.size() / ((float)num_threads + 1));
-    int exampleBegin = *id * exampleStripe;
+    int exampleStripe = (int)ceil(examples.size() / ((float)num_threads));
+    int exampleBegin = min(*id * exampleStripe, (int)examples.size());
     int exampleEnd = min(exampleBegin + exampleStripe, (int)examples.size());
 
-    int centroidStripe = (int)ceil(centroids.size() / ((float)num_threads + 1));
-    int centroidBegin = *id * centroidStripe;
+    int centroidStripe = (int)ceil(centroids.size() / ((float)num_threads));
+    int centroidBegin = min(*id * centroidStripe, (int)centroids.size());
     int centroidEnd = min(centroidBegin + centroidStripe, (int)centroids.size());
 
     // pthread_mutex_lock(&lock);
-    // cout << "id: " << (*id) << " begin: " << exampleBegin << " end: " << exampleEnd << endl;
-    // cout << "id: " << (*id) << " begin: " << centroidBegin << " end: " << centroidEnd << endl << endl;
+    // cout << "id: " << (*id) << " begin: " << exampleBegin << " end: " << exampleEnd << " stripe: " << exampleStripe << endl;
+    // cout << "id: " << (*id) << " begin: " << centroidBegin << " end: " << centroidEnd << " stripe: " << centroidStripe << endl << endl;
     // pthread_mutex_unlock(&lock);
     // while (true);
 
@@ -97,25 +97,29 @@ void *k_means(void *t_id)
     {
         for (int example = exampleBegin; example < exampleEnd; example++)
             examples.at(example).at((examples.at(example).size() - 1)) = closest_centroid(examples.at(example));
-        finished = true;
         pthread_barrier_wait(&barrier);
+        finished = true;
         for (int centroid = centroidBegin; centroid < centroidEnd; centroid++)
             centroids.at(centroid) = recalculate(centroid, centroids.at(centroid));
         pthread_barrier_wait(&barrier);
         iteration[*id] += 1;
     }
+    // pthread_mutex_lock(&lock);
+    // cout << "id " << *id << " iteration " << iteration[*id] << endl;
+    // pthread_mutex_unlock(&lock);
+    // pthread_barrier_wait(&barrier);
 }
 
 int main(int argc, char *argv[])
 {
     string extracted, comma, basename(argv[1]);
     ifstream base, centroid;
-    num_threads = atoi(argv[2]) - 1;
-    iteration = (int *)calloc(sizeof(int) * num_threads, 0);
-    int ids[num_threads + 1];
+    num_threads = atoi(argv[2]);
+    iteration = (int *)malloc(sizeof(int) * num_threads);
+    int ids[num_threads];
     pthread_t threads[num_threads];
-    pthread_barrier_init(&barrier, NULL, num_threads + 1);
     pthread_mutex_init(&lock, NULL);
+    pthread_barrier_init(&barrier, NULL, num_threads);
     vector<int> temp;
 
     base.open("bases/int_base_" + basename + ".data");
@@ -132,7 +136,6 @@ int main(int argc, char *argv[])
             temp.clear();
         }
     }
-    base.close();
     centroid.open("bases/int_centroid_" + basename + "_20.data");
     while (!centroid.eof())
     {
@@ -146,20 +149,20 @@ int main(int argc, char *argv[])
             temp.clear();
         }
     }
-    centroid.close();
     for (int i = 0; i < num_threads; i++)
     {
-        ids[i + 1] = i + 1;
-        pthread_create(&threads[i], NULL, k_means, (void *)(&ids[i + 1]));
+        ids[i] = i;
+        iteration[i] = 0;
+        pthread_create(&threads[i], NULL, k_means, (void *)(&ids[i]));
     }
-    ids[0] = 0;
-    k_means((void *)(&ids[0]));
-    for (int i = 1; i < num_threads; i++)
+    for (int i = 0; i < num_threads; i++)
         pthread_join(threads[i], NULL);
-    ofstream myfile("results/my_saida_" + basename + "_par");
+
+    ofstream myfile("results/my_saida_" + basename + "_par_" + argv[2]);
     myfile << "numero de iteracoes:" << iteration[0];
     for (auto value : examples | boost::adaptors::indexed(1))
         myfile << "id=" << value.index() - 1 << ", classe=" << value.value().at(value.value().size() - 1) << endl;
+    myfile.close();
     pthread_barrier_destroy(&barrier);
     return 0;
 }

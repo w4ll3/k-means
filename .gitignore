@@ -33,6 +33,5 @@
 
 .vscode/*
 bases/*
-results/*
 k-means-par
 k-means-seq

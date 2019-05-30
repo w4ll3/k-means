@@ -72,7 +72,7 @@ vector<int> recalculate(int centroid_id, vector<int> centroid)
 
 void k_means()
 {
-    while (iteration < 300)
+    while (!finished)
     {
         for (auto &example : examples)
             example.at(example.size() - 1) = closest_centroid(example);

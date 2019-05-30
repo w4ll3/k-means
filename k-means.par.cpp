@@ -79,7 +79,6 @@ vector<int> recalculate(int centroid_id, vector<int> centroid)
 void *k_means(void *t_id)
 {
     int *id = (int *)t_id;
-    id++;
     int exampleStripe = (int)ceil(examples.size() / ((float)num_threads + 1));
     int exampleBegin = *id * exampleStripe;
     int exampleEnd = min(exampleBegin + exampleStripe, (int)examples.size());
@@ -87,6 +86,12 @@ void *k_means(void *t_id)
     int centroidStripe = (int)ceil(centroids.size() / ((float)num_threads + 1));
     int centroidBegin = *id * centroidStripe;
     int centroidEnd = min(centroidBegin + centroidStripe, (int)centroids.size());
+
+    // pthread_mutex_lock(&lock);
+    // cout << "id: " << (*id) << " begin: " << exampleBegin << " end: " << exampleEnd << endl;
+    // cout << "id: " << (*id) << " begin: " << centroidBegin << " end: " << centroidEnd << endl << endl;
+    // pthread_mutex_unlock(&lock);
+    // while (true);
 
     while (!finished)
     {
@@ -147,6 +152,7 @@ int main(int argc, char *argv[])
         ids[i + 1] = i + 1;
         pthread_create(&threads[i], NULL, k_means, (void *)(&ids[i + 1]));
     }
+    ids[0] = 0;
     k_means((void *)(&ids[0]));
     for (int i = 1; i < num_threads; i++)
         pthread_join(threads[i], NULL);

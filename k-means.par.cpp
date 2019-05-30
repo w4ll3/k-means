@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
     for (int i = 1; i < num_threads; i++)
         pthread_join(threads[i], NULL);
     ofstream myfile("results/my_saida_" + basename + "_par");
-    myfile << "numero de iteracoes:" << iteration[0] << endl;
+    myfile << "numero de iteracoes:" << iteration[0];
     for (auto value : examples | boost::adaptors::indexed(1))
         myfile << "id=" << value.index() - 1 << ", classe=" << value.value().at(value.value().size() - 1) << endl;
     pthread_barrier_destroy(&barrier);

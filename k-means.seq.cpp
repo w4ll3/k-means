@@ -121,8 +121,8 @@ int main(int argc, char *argv[])
         }
         centroid.close();
         k_means();
-        ofstream myfile("results/my_saida_" + basename + "_par");
-        myfile << "numero de iteracoes:" << iteration << endl;
+        ofstream myfile("results/my_saida_" + basename + "_seq");
+        myfile << "numero de iteracoes:" << iteration;
         for (auto value : examples | boost::adaptors::indexed(1))
             myfile << "id=" << value.index() - 1 << ", classe=" << value.value().at(value.value().size() - 1) << endl;
     }

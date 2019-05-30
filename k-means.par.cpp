@@ -69,31 +69,35 @@ vector<int> recalculate(int centroid_id, vector<int> centroid)
         {
             centroid_axis.value() /= total;
             if (centroid_axis.value() != centroid.at(centroid_axis.index() - 1))
+            {
                 finished = false;
+            }
         }
     return total ? new_centroid : centroid;
 }
 
 void *k_means(void *t_id)
 {
-    int id = *((int *)t_id);
-    int exampleStripe = examples.size() / num_threads;
-    int exampleBegin = id * exampleStripe;
-    int exampleEnd = exampleBegin + exampleStripe;
+    int *id = (int *)t_id;
+    id++;
+    int exampleStripe = (int)ceil(examples.size() / ((float)num_threads + 1));
+    int exampleBegin = *id * exampleStripe;
+    int exampleEnd = min(exampleBegin + exampleStripe, (int)examples.size());
 
-    int centroidStripe = centroids.size() / num_threads;
-    int centroidBegin = id * centroidStripe;
-    int centroidEnd = centroidBegin + centroidStripe;
+    int centroidStripe = (int)ceil(centroids.size() / ((float)num_threads + 1));
+    int centroidBegin = *id * centroidStripe;
+    int centroidEnd = min(centroidBegin + centroidStripe, (int)centroids.size());
+
     while (!finished)
     {
-        for (int example = exampleBegin; example != exampleEnd; example++)
+        for (int example = exampleBegin; example < exampleEnd; example++)
             examples.at(example).at((examples.at(example).size() - 1)) = closest_centroid(examples.at(example));
         finished = true;
         pthread_barrier_wait(&barrier);
-        for (int centroid = centroidBegin; centroid != centroidEnd; centroid++)
+        for (int centroid = centroidBegin; centroid < centroidEnd; centroid++)
             centroids.at(centroid) = recalculate(centroid, centroids.at(centroid));
         pthread_barrier_wait(&barrier);
-        iteration[id] += 1;
+        iteration[*id] += 1;
     }
 }
 
@@ -103,10 +107,10 @@ int main(int argc, char *argv[])
     ifstream base, centroid;
     num_threads = atoi(argv[2]) - 1;
     iteration = (int *)calloc(sizeof(int) * num_threads, 0);
-    int ids[num_threads];
-    ids[0] = 0;
+    int ids[num_threads + 1];
     pthread_t threads[num_threads];
-    pthread_barrier_init(&barrier, NULL, num_threads);
+    pthread_barrier_init(&barrier, NULL, num_threads + 1);
+    pthread_mutex_init(&lock, NULL);
     vector<int> temp;
 
     base.open("bases/int_base_" + basename + ".data");
@@ -138,16 +142,16 @@ int main(int argc, char *argv[])
         }
     }
     centroid.close();
-    for (int i = 1; i < num_threads; i++)
+    for (int i = 0; i < num_threads; i++)
     {
-        ids[i] = i;
-        pthread_create(&threads[i], NULL, k_means, (ids + i));
+        ids[i + 1] = i + 1;
+        pthread_create(&threads[i], NULL, k_means, (void *)(&ids[i + 1]));
     }
-    k_means(ids);
+    k_means((void *)(&ids[0]));
     for (int i = 1; i < num_threads; i++)
         pthread_join(threads[i], NULL);
     ofstream myfile("results/my_saida_" + basename + "_par");
-    myfile << "numero de iteracoes:" << accumulate(iteration, iteration + num_threads, 0) << endl;
+    myfile << "numero de iteracoes:" << iteration[0] << endl;
     for (auto value : examples | boost::adaptors::indexed(1))
         myfile << "id=" << value.index() - 1 << ", classe=" << value.value().at(value.value().size() - 1) << endl;
     pthread_barrier_destroy(&barrier);

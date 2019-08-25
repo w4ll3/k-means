@@ -1,5 +1,5 @@
-CC=g++
-CFLAGS=-O3 -lpthread
+CC=g++ -I/usr/include
+CFLAGS=-O3 -lpthread -lboost_mpi -lboost_serialization -lboost_system -lboost_filesystem -lboost_graph_parallel -lboost_iostreams
 
 all: par seq
 
